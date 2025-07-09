@@ -1,4 +1,4 @@
-import { toUppercase } from "../app/Utils"
+import { getStringInfo, toUppercase } from "../app/Utils"
 
 describe('Utils test suite', () => {
     it('Should convert a string to uppercase', () =>{
@@ -9,5 +9,34 @@ describe('Utils test suite', () => {
         const actual = sut('abc')
         // assert
         expect(actual).toBe(expected)
+    })
+
+    it('should return valid info from a string', () => {
+        const actual = getStringInfo('My-String');
+
+        // Regular strings
+        expect(actual.lowerCase).toBe('my-string');
+        expect(actual.upperCase).toBe('MY-STRING');
+
+        // Length and quantity
+        expect(actual).toHaveLength(9);
+        expect(actual.length).toBe(9)
+
+        // Characters and strings chains
+        expect(actual.characters).toEqual(['M', 'y', '-', 'S', 't', 'r', 'i', 'n', 'g']);
+        expect(actual.characters).toContain<string>('M');
+        expect(actual.characters).toEqual(expect.arrayContaining(['i', 'n', 'g','M', 'y', '-', 'S', 't', 'r']));
+
+        // Objects - Requires toEqual, not toBe
+        expect(actual.extraInfo).toEqual({});
+
+        // Definition and truthiness
+        expect(actual).toBeDefined();
+        expect(actual).toBeTruthy();
+        expect(actual).not.toBe(undefined);
+        expect(actual).not.toBeUndefined();
+        expect(actual).not.toBeNull();
+
+        
     })
 })
