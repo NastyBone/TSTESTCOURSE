@@ -18,7 +18,7 @@ jest.mock('../../../app/server_app/data/DataBase', () => {
     }
 })
 
-describe.only('Test suite for users credentials data access', () => {
+describe('Test suite for users credentials data access', () => {
     let sut: SessionTokenDataAccess
     const someAccount: Account = {
         id: '',
