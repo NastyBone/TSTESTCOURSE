@@ -1,58 +1,53 @@
-import { RegisterHandler } from "../../../app/server_app/handlers/RegisterHandler"
-import { Account } from "../../../app/server_app/model/AuthModel";
-import { HTTP_CODES, HTTP_METHODS } from "../../../app/server_app/model/ServerModel";
+import { LoginHandler } from "../../../app/server_app/handlers/LoginHandler"
+import { Account } from "../../../app/server_app/model/AuthModel"
+import { HTTP_CODES, HTTP_METHODS } from "../../../app/server_app/model/ServerModel"
 
 const getRequestBodyMock = jest.fn()
-
-jest.mock('../../../app/server_app/utils/Utils', () => ({
+jest.mock("../../../app/server_app/utils/Utils", () => ({
     getRequestBody: () => getRequestBodyMock()
 }))
-
-describe('Test Suite for RegisterHandler', () => {
-    let sut: RegisterHandler;
-
+describe('Test suite for LoginHandler class', () => {
+    let sut: LoginHandler
     const requestMock = {
         method: undefined,
     }
     const responseMock = {
         statusCode: 0,
-        writeHead: jest.fn(),
         write: jest.fn(),
+        writeHead: jest.fn(),
     }
     const authorizerMock = {
-        registerUser: jest.fn(),
+        login: jest.fn(),
     }
 
-    const someId: number = 0;
+    const someToken = 'token123ABC'
     const someAccount: Account = {
         id: '',
         userName: 'someUsername',
         password: 'somePassword',
     }
+
     beforeEach(() => {
-        sut = new RegisterHandler(
+        sut = new LoginHandler(
             requestMock as any,
             responseMock as any,
-            authorizerMock as any,
-        );
+            authorizerMock as any
+        )
     })
 
     afterEach(() => {
         jest.clearAllMocks()
     })
 
-
-    it('Should register an user', async () => {
+    it('Should login the user sucessfully', async () => {
+        getRequestBodyMock.mockResolvedValueOnce(someAccount)
         requestMock.method = HTTP_METHODS.POST;
-        getRequestBodyMock.mockResolvedValueOnce(someAccount);
-        authorizerMock.registerUser.mockResolvedValueOnce(someId)
+        authorizerMock.login.mockResolvedValueOnce(someToken)
 
         await sut.handleRequest();
 
-        expect(responseMock.statusCode).toBe(HTTP_CODES.CREATED);
-        expect(responseMock.write).toHaveBeenCalledWith(JSON.stringify({
-            userId: someId,
-        }))
+        expect(responseMock.statusCode).toBe(HTTP_CODES.CREATED)
+        expect(responseMock.write).toHaveBeenCalledWith(JSON.stringify({ token: someToken }))
         expect(responseMock.writeHead).toHaveBeenCalledWith(HTTP_CODES.CREATED, { 'Content-Type': 'application/json' })
     })
 
@@ -61,7 +56,6 @@ describe('Test Suite for RegisterHandler', () => {
         getRequestBodyMock.mockResolvedValueOnce({});
 
         await sut.handleRequest();
-
 
         expect(responseMock.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
         expect(responseMock.write).toHaveBeenCalledWith(JSON.stringify("userName and password required"))
@@ -74,6 +68,6 @@ describe('Test Suite for RegisterHandler', () => {
 
         expect(responseMock.write).not.toHaveBeenCalled()
         expect(responseMock.writeHead).not.toHaveBeenCalled()
-        expect(authorizerMock.registerUser).not.toHaveBeenCalled()
+        expect(authorizerMock.login).not.toHaveBeenCalled()
     })
 })
