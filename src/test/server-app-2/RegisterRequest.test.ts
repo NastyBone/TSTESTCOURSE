@@ -25,6 +25,10 @@ describe('Test suite for register requests', () => {
         responseWrapper.clearFields();
     })
 
+    beforeEach(() => {
+        requestWrapper.headers["user-agent"] = "Windows" 
+    })
+
     it('Should insert a user', async () => {
         requestWrapper.url = 'localhost:8080/register';
         requestWrapper.method = HTTP_METHODS.POST;
@@ -32,13 +36,33 @@ describe('Test suite for register requests', () => {
             userName: 'userName',
             password: 'password'
         }
-        requestWrapper.headers.push(JSON.parse(`{"user-agent": "Windows"}`))
         jest.spyOn(DataBase.prototype, 'insert').mockResolvedValueOnce('1234');
-        await new Server().startServer(); 
+        await new Server().startServer();
         await new Promise(process.nextTick);
         expect(responseWrapper.statusCode).toBe(HTTP_CODES.CREATED);
         expect(responseWrapper.body).toEqual(expect.objectContaining({
             userId: expect.any(String)
         }))
+    })
+
+    it('Should reject request on invalid or missing userName and password', async () => {
+        requestWrapper.url = 'localhost:8080/register';
+        requestWrapper.method = HTTP_METHODS.POST;
+        requestWrapper.body = {
+        }
+        await new Server().startServer();
+        await new Promise(process.nextTick);
+         expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+        expect(responseWrapper.body).toEqual('userName and password required')
+    })
+
+        it('Should do nothing on not handled routes', async () => {
+        requestWrapper.url = 'localhost:8080/register';
+        requestWrapper.method = HTTP_METHODS.DELETE;
+        await new Server().startServer();
+        await new Promise(process.nextTick);
+
+         expect(responseWrapper.statusCode).toBeUndefined();
+        expect(responseWrapper.body).toBeUndefined();
     })
 })
